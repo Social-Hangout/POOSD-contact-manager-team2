@@ -1,1 +1,18 @@
- 
+# Environment / config
+.env
+config.php
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+
+# Dependencies
+vendor/
+node_modules/
+
+# Logs
+*.log
