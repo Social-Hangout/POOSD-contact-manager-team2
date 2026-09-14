@@ -12,11 +12,13 @@ mysql -u <user> -p <database_name> < db/schema.sql
 
 ### users
 
-| Column   | Type         | Notes                       |
-|----------|--------------|-----------------------------|
-| id       | INT UNSIGNED | Primary key, auto-increment |
-| email    | VARCHAR(255) | Required, unique            |
-| username | VARCHAR(50)  | Required, unique            |
+| Column        | Type          | Notes                       |
+|---------------|---------------|-----------------------------|
+| id            | INT UNSIGNED  | Primary key, auto-increment |
+| email         | VARCHAR(255)  | Required, unique            |
+| username      | VARCHAR(50)   | Required, unique            |
+| password_hash | VARCHAR (255) | Required                    |
+| created_at    | DATETIME      | Auto-set on insert          |
 
 ## Adding to the Database
 
