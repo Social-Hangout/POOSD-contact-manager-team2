@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS users (
     email           VARCHAR(255) NOT NULL,
     username        VARCHAR(50)  NOT NULL,
     password_hash   VARCHAR(255) NOT NULL,
-    created_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id),
     UNIQUE KEY uq_users_email (email),
@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS contacts (
     last_name   VARCHAR(100) NOT NULL,
     email       VARCHAR(255) NOT NULL,
     phone       VARCHAR(80) NOT NULL,
-    created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
     PRIMARY KEY (id),
     KEY idx_first_name (first_name),
