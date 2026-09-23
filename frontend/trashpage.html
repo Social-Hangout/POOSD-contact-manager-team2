@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Trash – Follow</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <img class="logo" src="WebsiteLogo.png" alt="Company logo">
+    <nav class="main-nav">
+      <a href="contactsmain.html">Home</a>
+      <a href="#">Privacy</a>
+      <a href="#">About</a>
+    </nav>
+    <!-- Hardcoded for now, but later JS will fill in with actual First and Last name. -->
+    <a class="user-badge" id="user-name" href="userprofile.html">Firstname Lastname</a>
+  </header>
+
+  <div class="page-body">
+    <aside class="sidebar">
+      <a class="sidebar-btn" href="create-contact.html">Create Contact</a>
+      <a class="sidebar-btn" href="contactsmain.html">All Contacts</a>
+      <a class="sidebar-btn" href="trashpage.html">Trash</a>
+    </aside>
+
+    <main class="content">
+      <div class="trash-banner">
+        <p>Contacts that have been in Trash more than 30 days will be deleted forever</p>
+        <!-- later JS: call an API to permanently delete everything in trash, with a confirm step -->
+        <button type="button" class="pill-btn" id="empty-trash-btn">Empty Now?</button>
+      </div>
+
+      <div class="trash-tab">Trash (<span id="trash-count">0</span>)</div>
+
+      <div class="contact-list" id="trash-list">
+        <p class="empty-state" id="trash-empty-state">
+          No deleted contacts.
+        </p>
+      </div>
+
+      <template id="trash-row-template">
+        <div class="contact-row trash-row">
+          <div class="avatar"></div>
+          <div>
+            <div class="contact-name"></div>
+            <div class="contact-phone"></div>
+          </div>
+        </div>
+      </template>
+    </main>
+  </div>
+
+</body>
+</html>

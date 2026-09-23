@@ -1,0 +1,328 @@
+
+   /* style.css — shared styles for pages (Contacts, Create Contact, Contact Profile). */
+
+:root 
+{
+  --header-green: #b1d3b9;      /* top nav bar */
+  --pill-green: #88bda4;        /* buttons + sidebar */
+  --pill-green-dark: #659287;   /* darker buttons (user badge, save?/back?) */
+  --page-bg: #e6f2dd;           /* light green page background */
+  --panel-gray: #d9d9d9;        /* sidebar + card backgrounds */
+  --row-gray: #dcdcdc;          /* contact list row background  */
+  --avatar-teal: #7fb08a;       /* color for avatar circle without initials */
+  --white: #ffffff;
+  --text-dark: #2e2e2e;
+  --text-muted: #6b6b6b;
+  --text-on-green: #1f1f1f;
+
+  --radius: 10px;              
+  --gap: 16px;                
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body 
+{
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background-color: var(--page-bg);
+  color: var(--text-dark);
+}
+
+button 
+{
+  font: inherit;
+  cursor: pointer;
+  border: none;
+}
+
+input 
+{
+  font: inherit;
+}
+
+/* -----------------------------------------------------------
+   3) HEADER (top green bar: logo, nav links, user badge)
+   Flexbox (display: flex) lines items up in a row and
+   "justify-content: space-between" pushes the logo to the far
+   left and the user badge to the far right, with the nav
+   links free to sit in the middle.
+   ----------------------------------------------------------- */
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--header-green);
+  padding: 18px 32px;
+}
+
+/* The logo is a real image (your Figma export), not styled
+   text — this just controls its size in the header. Swap
+   logo-placeholder.svg for your actual exported file whenever
+   it's ready; the <img> tag in each page already points at it. */
+.logo 
+{
+  height: 60px;
+  width: auto;
+}
+
+.main-nav 
+{
+  display: flex;
+  gap: 32px;
+}
+
+.main-nav a 
+{
+  color: var(--text-on-green);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.main-nav a:hover 
+{
+  text-decoration: underline;
+}
+
+.user-badge 
+{
+  background-color: var(--pill-green-dark);
+  color: var(--white);
+  padding: 10px 18px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none; 
+}
+
+/* PAGE LAYOUT  */
+.page-body 
+{
+  display: flex;
+  gap: var(--gap);
+  padding: 24px 32px;
+}
+
+.sidebar 
+{
+  background-color: var(--panel-gray);
+  border-radius: var(--radius);
+  padding: 20px;
+  width: 150px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-self: flex-start; /* so it doesn't stretch to match tall content on the right */
+}
+
+.sidebar-btn 
+{
+  background-color: var(--pill-green);
+  color: var(--white);
+  border-radius: 20px;
+  padding: 14px 10px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none; 
+  display: block;
+}
+
+.content 
+{
+  background-color: var(--panel-gray);
+  border-radius: var(--radius);
+  padding: 24px;
+  flex: 1; 
+}
+
+/* CONTACTS LIST PAGE */
+.search-bar 
+{
+  background-color: var(--row-gray);
+  border: none;
+  border-radius: 20px;
+  padding: 14px 18px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.contact-list 
+{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.contact-row 
+{
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background-color: var(--row-gray);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  text-decoration: none;
+  color: inherit;
+}
+/* AI-assisted: flexbox centering approach for initials-in-circle avatar suggested by Claude */
+.avatar 
+{
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--avatar-teal);
+  flex-shrink: 0; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* HOOK: whoever wires up real data sets each avatar's text via
+   JavaScript, e.g. avatarEl.textContent = "JS" (from the
+   contact's first + last initials). The HTML below just shows
+   what that looks like with example initials filled in. */
+
+/* Empty state: shown by default since a brand-new user has no
+   contacts yet. Once JavaScript loads real contacts from the
+   API, it should hide this and build rows instead (see the
+   HOOK comment in contactsmain.html for exactly where). */
+.empty-state 
+{
+  text-align: center;
+  color: var(--text-muted);
+  padding: 40px 20px;
+}
+
+.contact-name 
+{
+  font-weight: 600;
+}
+
+.contact-phone 
+{
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* CREATE CONTACT PAGE */
+.form-toolbar 
+{
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.pill-btn 
+{
+  background-color: var(--pill-green-dark);
+  color: var(--white);
+  border-radius: 20px;
+  padding: 10px 22px;
+  font-weight: 600;
+}
+
+
+.visually-hidden 
+{
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+.text-input 
+{
+  display: block;
+  width: 100%;
+  background-color: var(--white);
+  border: 1px solid #ccc;
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+/* CONTACT PROFILE PAGE. grid lays fields out in two even columns */
+.profile-top 
+{
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.profile-top .avatar 
+{
+  width: 56px;
+  height: 56px;
+}
+
+.field-grid 
+{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.field-pill 
+{
+  background-color: var(--pill-green);
+  color: var(--white);
+  border-radius: 20px;
+  padding: 14px 18px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.action-row 
+{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.action-row .field-pill
+{
+  background-color: var(--pill-green-dark);
+}
+
+/* TRASH PAGE */
+/* negative margins pull this flush against .content's padding so it spans the full card width */
+.trash-banner
+{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background-color: var(--pill-green);
+  color: var(--white);
+  font-weight: 600;
+  text-align: center;
+  padding: 16px 20px;
+  margin: -24px -24px 20px -24px;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.trash-tab
+{
+  display: inline-block;
+  background-color: var(--pill-green);
+  color: var(--white);
+  border-radius: 20px;
+  padding: 10px 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+/* white instead of the gray contact-row background, to set trashed contacts apart */
+.trash-row
+{
+  background-color: var(--white);
+}
