@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="main.css">
+  <title>Sign up – Follow</title>
+</head>
+<body>
+
+  <header class="site-header">
+    <img class="logo" src="WebsiteLogo.png" alt="Follow">
+    <nav class="main-nav">
+      <a href="main.html">Home</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="about.html">About</a>
+    </nav>
+    <a class="login-btn" href="logIn.html">Log in</a>
+  </header>
+
+  <main class="auth-page">
+    <h1 class="auth-title">Welcome!</h1>
+
+    <form class="auth-form" action="logIn.html" method="post">
+      <div class="form-field">
+        <label for="email">Please sign up with your email</label>
+        <input type="email" id="email" name="email" autocomplete="email" required>
+      </div>
+
+      <div class="form-field">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password"
+               autocomplete="new-password" minlength="8" required
+               pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{8,}"
+               title="At least 8 characters with a lower case letter, an upper case letter, a number and a special character"
+               aria-describedby="password-rules">
+      </div>
+
+      <div class="form-field">
+        <label for="password-again">Type password again:</label>
+        <input type="password" id="password-again" name="password-again"
+               autocomplete="new-password" required>
+      </div>
+
+      <div class="requirements" id="password-rules">
+        Requirements:
+        <ul>
+          <li>Minimum of 8 characters</li>
+          <li>Lower case</li>
+          <li>Upper case</li>
+          <li>Numbers</li>
+          <li>Special characters</li>
+        </ul>
+      </div>
+
+      <button type="submit" class="green-btn auth-btn">Sign up</button>
+    </form>
+
+    <div class="tree-branch">
+      <img src="Group 1.png" alt="">
+    </div>
+  </main>
+
+</body>
+</html>
