@@ -1,111 +1,221 @@
-
-   /* style.css — shared styles for pages (Contacts, Create Contact, Contact Profile). */
-
-:root 
+/* style.css — shared styles for ALL pages (public + dashboard) */
+:root
 {
-  --header-green: #b1d3b9;      /* top nav bar */
-  --pill-green: #88bda4;        /* buttons + sidebar */
-  --pill-green-dark: #659287;   /* darker buttons (user badge, save?/back?) */
-  --page-bg: #e6f2dd;           /* light green page background */
-  --panel-gray: #d9d9d9;        /* sidebar + card backgrounds */
-  --row-gray: #dcdcdc;          /* contact list row background  */
-  --avatar-teal: #7fb08a;       /* color for avatar circle without initials */
+  --header-green: #b1d3b9;
+  --pill-green: #88bda4;
+  --pill-green-dark: #659287;
+  --page-bg: #e6f2dd;
+  --input-gray: #d9d9d9;
+  --panel-gray: #d9d9d9;
+  --row-gray: #dcdcdc;
+  --avatar-teal: #7fb08a;
   --white: #ffffff;
   --text-dark: #2e2e2e;
   --text-muted: #6b6b6b;
   --text-on-green: #1f1f1f;
-
-  --radius: 10px;              
-  --gap: 16px;                
+  --radius: 10px;
+  --gap: 16px;
+  --header-height: 64px;
 }
+* { box-sizing: border-box; }
 
-* {
-  box-sizing: border-box;
-}
-
-body 
+body
 {
   margin: 0;
-  font-family: "Segoe UI", Arial, sans-serif;
+  font-family: "Roboto", "Segoe UI", Arial, sans-serif;
   background-color: var(--page-bg);
   color: var(--text-dark);
 }
+button { font: inherit; cursor: pointer; border: none; }
+input { font: inherit; }
 
-button 
+a:focus-visible,
+button:focus-visible,
+input:focus-visible
 {
-  font: inherit;
-  cursor: pointer;
-  border: none;
+  outline: 3px solid var(--pill-green-dark);
+  outline-offset: 2px;
 }
 
-input 
-{
-  font: inherit;
-}
-
-/* -----------------------------------------------------------
-   3) HEADER (top green bar: logo, nav links, user badge)
-   Flexbox (display: flex) lines items up in a row and
-   "justify-content: space-between" pushes the logo to the far
-   left and the user badge to the far right, with the nav
-   links free to sit in the middle.
-   ----------------------------------------------------------- */
+/* ===== HEADER (every page) ===== */
 .site-header {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
+  height: var(--header-height);
   background-color: var(--header-green);
-  padding: 18px 32px;
+  padding: 0 24px;
 }
-
-/* The logo is a real image (your Figma export), not styled
-   text — this just controls its size in the header. Swap
-   logo-placeholder.svg for your actual exported file whenever
-   it's ready; the <img> tag in each page already points at it. */
-.logo 
+.site-header .logo,
+.logo
 {
   height: 60px;
   width: auto;
+  justify-self: start;
 }
-
-.main-nav 
-{
-  display: flex;
-  gap: 32px;
-}
-
-.main-nav a 
+.main-nav { display: flex; gap: 28px; }
+.main-nav a
 {
   color: var(--text-on-green);
   text-decoration: none;
-  font-weight: 600;
+  font-size: 0.95rem;
+  font-weight: 500;
 }
-
-.main-nav a:hover 
+.main-nav a:hover,
+.main-nav a[aria-current="page"]
 {
   text-decoration: underline;
+  text-underline-offset: 4px;
 }
-
-.user-badge 
+.login-btn
 {
+  justify-self: end;
+  background-color: var(--pill-green-dark);
+  color: var(--white);
+  text-decoration: none;
+  font-size: 0.9rem;
+  padding: 6px 28px;
+  border-radius: 6px;
+}
+.login-btn:hover { filter: brightness(1.08); }
+
+.user-badge
+{
+  justify-self: end;
   background-color: var(--pill-green-dark);
   color: var(--white);
   padding: 10px 18px;
   border-radius: 20px;
   font-size: 14px;
   font-weight: 600;
-  text-decoration: none; 
+  text-decoration: none;
 }
 
-/* PAGE LAYOUT  */
-.page-body 
+/* ===== SHARED BUTTONS ===== */
+.green-btn
 {
-  display: flex;
-  gap: var(--gap);
-  padding: 24px 32px;
+  display: inline-block;
+  background-color: var(--pill-green);
+  color: var(--white);
+  text-decoration: none;
+  text-align: center;
+  border-radius: 10px;
+}
+.green-btn:hover { filter: brightness(1.05); }
+
+.tree-branch
+{
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: min(80%, 1100px);
+  pointer-events: none;
+  z-index: 0;
+}
+.tree-branch img { display: block; width: 100%; height: auto; }
+
+/* ===== PUBLIC: HOME PAGE ===== */
+.hero
+{
+  position: relative;
+  min-height: calc(100vh - var(--header-height));
+  padding: 48px 24px 0;
+  text-align: center;
+  overflow: hidden;
+}
+.hero-title
+{
+  position: relative;
+  z-index: 1;
+  margin: 0 auto;
+  max-width: 14ch;
+  color: var(--pill-green);
+  font-size: clamp(2.5rem, 8vw, 5.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+}
+.signup-btn
+{
+  position: relative;
+  z-index: 1;
+  margin-top: 40px;
+  padding: 22px 64px;
+  font-size: 1.4rem;
+  border-radius: 16px;
 }
 
-.sidebar 
+/* ===== PUBLIC: LOGIN + SIGNUP ===== */
+.auth-page
+{
+  position: relative;
+  min-height: calc(100vh - var(--header-height));
+  padding: 40px 24px 28vw;
+  overflow: hidden;
+}
+.auth-title
+{
+  position: relative;
+  z-index: 1;
+  margin: 0 0 32px;
+  text-align: center;
+  color: var(--pill-green);
+  font-size: clamp(2.5rem, 7vw, 4.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+}
+.auth-form
+{
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto;
+}
+.form-field { display: flex; flex-direction: column; gap: 6px; }
+.form-field label { font-size: 0.95rem; color: var(--text-on-green); }
+.form-field input
+{
+  width: 100%;
+  height: 34px;
+  padding: 0 12px;
+  background-color: var(--input-gray);
+  border: 2px solid transparent;
+  border-radius: 8px;
+  color: var(--text-dark);
+}
+.form-field input:focus { border-color: var(--pill-green); outline: none; }
+.requirements { margin: -8px 0 0; font-size: 0.7rem; color: var(--text-muted); line-height: 1.4; }
+.requirements ul { margin: 2px 0 0; padding-left: 18px; }
+.auth-btn { align-self: center; margin-top: 8px; padding: 10px 44px; font-size: 1rem; }
+
+/* ===== PUBLIC: ABOUT + PRIVACY ===== */
+.info-page { max-width: 720px; margin: 0 auto; padding: 48px 24px 64px; }
+.info-logo { display: block; width: min(320px, 70%); height: auto; margin: 0 auto 32px; }
+.info-page h3
+{
+  margin: 0 0 20px;
+  text-align: center;
+  color: var(--pill-green);
+  font-size: clamp(1.75rem, 5vw, 2.75rem);
+  font-weight: 700;
+  line-height: 1.15;
+}
+.info-page h4 { margin: 32px 0 8px; color: var(--pill-green-dark); font-size: 1.15rem; font-weight: 700; }
+.info-page p,
+.info-page li
+{
+  margin: 0 0 16px;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--text-dark);
+}
+
+/* ===== DASHBOARD: PAGE LAYOUT ===== */
+.page-body { display: flex; gap: var(--gap); padding: 24px 32px; }
+.sidebar
 {
   background-color: var(--panel-gray);
   border-radius: var(--radius);
@@ -114,10 +224,9 @@ input
   display: flex;
   flex-direction: column;
   gap: 16px;
-  align-self: flex-start; /* so it doesn't stretch to match tall content on the right */
+  align-self: flex-start;
 }
-
-.sidebar-btn 
+.sidebar-btn
 {
   background-color: var(--pill-green);
   color: var(--white);
@@ -126,20 +235,13 @@ input
   text-align: center;
   font-size: 14px;
   font-weight: 600;
-  text-decoration: none; 
+  text-decoration: none;
   display: block;
 }
+.content { background-color: var(--panel-gray); border-radius: var(--radius); padding: 24px; flex: 1; }
 
-.content 
-{
-  background-color: var(--panel-gray);
-  border-radius: var(--radius);
-  padding: 24px;
-  flex: 1; 
-}
-
-/* CONTACTS LIST PAGE */
-.search-bar 
+/* ===== DASHBOARD: CONTACTS LIST ===== */
+.search-bar
 {
   background-color: var(--row-gray);
   border: none;
@@ -148,15 +250,8 @@ input
   width: 100%;
   margin-bottom: 20px;
 }
-
-.contact-list 
-{
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.contact-row 
+.contact-list { display: flex; flex-direction: column; gap: 12px; }
+.contact-row
 {
   display: flex;
   align-items: center;
@@ -167,14 +262,13 @@ input
   text-decoration: none;
   color: inherit;
 }
-/* AI-assisted: flexbox centering approach for initials-in-circle avatar suggested by Claude */
-.avatar 
+.avatar
 {
   width: 40px;
   height: 40px;
   border-radius: 50%;
   background-color: var(--avatar-teal);
-  flex-shrink: 0; 
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -182,43 +276,13 @@ input
   font-weight: 700;
   font-size: 14px;
 }
+.empty-state { text-align: center; color: var(--text-muted); padding: 40px 20px; }
+.contact-name { font-weight: 600; }
+.contact-phone { color: var(--text-muted); font-size: 14px; }
 
-/* HOOK: whoever wires up real data sets each avatar's text via
-   JavaScript, e.g. avatarEl.textContent = "JS" (from the
-   contact's first + last initials). The HTML below just shows
-   what that looks like with example initials filled in. */
-
-/* Empty state: shown by default since a brand-new user has no
-   contacts yet. Once JavaScript loads real contacts from the
-   API, it should hide this and build rows instead (see the
-   HOOK comment in contactsmain.html for exactly where). */
-.empty-state 
-{
-  text-align: center;
-  color: var(--text-muted);
-  padding: 40px 20px;
-}
-
-.contact-name 
-{
-  font-weight: 600;
-}
-
-.contact-phone 
-{
-  color: var(--text-muted);
-  font-size: 14px;
-}
-
-/* CREATE CONTACT PAGE */
-.form-toolbar 
-{
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-
-.pill-btn 
+/* ===== DASHBOARD: CREATE CONTACT ===== */
+.form-toolbar { display: flex; justify-content: space-between; margin-bottom: 20px; }
+.pill-btn
 {
   background-color: var(--pill-green-dark);
   color: var(--white);
@@ -226,9 +290,7 @@ input
   padding: 10px 22px;
   font-weight: 600;
 }
-
-
-.visually-hidden 
+.visually-hidden
 {
   position: absolute;
   width: 1px;
@@ -236,8 +298,7 @@ input
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
 }
-
-.text-input 
+.text-input
 {
   display: block;
   width: 100%;
@@ -248,30 +309,11 @@ input
   margin-bottom: 16px;
 }
 
-/* CONTACT PROFILE PAGE. grid lays fields out in two even columns */
-.profile-top 
-{
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.profile-top .avatar 
-{
-  width: 56px;
-  height: 56px;
-}
-
-.field-grid 
-{
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.field-pill 
+/* ===== DASHBOARD: CONTACT PROFILE ===== */
+.profile-top { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+.profile-top .avatar { width: 56px; height: 56px; }
+.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.field-pill
 {
   background-color: var(--pill-green);
   color: var(--white);
@@ -280,21 +322,10 @@ input
   text-align: center;
   font-weight: 600;
 }
+.action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.action-row .field-pill { background-color: var(--pill-green-dark); }
 
-.action-row 
-{
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.action-row .field-pill
-{
-  background-color: var(--pill-green-dark);
-}
-
-/* TRASH PAGE */
-/* negative margins pull this flush against .content's padding so it spans the full card width */
+/* ===== DASHBOARD: TRASH PAGE ===== */
 .trash-banner
 {
   display: flex;
@@ -309,7 +340,6 @@ input
   margin: -24px -24px 20px -24px;
   border-radius: var(--radius) var(--radius) 0 0;
 }
-
 .trash-tab
 {
   display: inline-block;
@@ -320,9 +350,14 @@ input
   font-weight: 600;
   margin-bottom: 16px;
 }
+.trash-row { background-color: var(--white); }
 
-/* white instead of the gray contact-row background, to set trashed contacts apart */
-.trash-row
+/* ===== SMALL SCREENS ===== */
+@media (max-width: 600px)
 {
-  background-color: var(--white);
+  .site-header { grid-template-columns: 1fr auto; height: auto; padding: 12px 16px; row-gap: 8px; }
+  .main-nav { grid-column: 1 / -1; grid-row: 2; justify-content: center; }
+  .signup-btn { padding: 18px 48px; }
+  .tree-branch { width: 100%; }
+  .auth-page { padding-bottom: 40vw; }
 }
