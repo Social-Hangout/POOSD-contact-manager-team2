@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Contact Profile – Follow</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -11,12 +12,10 @@
     <img class="logo" src="WebsiteLogo.png" alt="Company logo">
     <nav class="main-nav">
       <a href="contactsmain.html">Home</a>
-      <a href="#">Privacy</a>
-      <a href="#">About</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="about.html">About</a>
     </nav>
-    <!-- HOOK: see the same note in contactsmain.html — JS fills this
-         in with the logged-in user's real name after login. -->
-    <div class="user-badge" id="user-name">Firstname Lastname</div>
+    <div class="user-badge" id="user-name">Account</div>
   </header>
 
   <div class="page-body">
@@ -27,27 +26,158 @@
     </aside>
 
     <main class="content">
-      <form>
-        
+      <form id="edit-form">
+        <input type="hidden" id="contact-id" value="">
+
         <div class="profile-top">
-          <div class="avatar" id="profile-avatar">FL</div>
-          <button type="button" class="field-pill" id="edit-phone" style="flex: 1;">Edit Phone number</button>
+          <div class="avatar" id="profile-avatar">?</div>
+          <input class="text-input" type="tel" id="phone" name="phone" placeholder="Phone number" style="flex: 1; margin-bottom: 0;">
         </div>
 
-        <!-- Row 2: first name / last name pills, two even columns -->
         <div class="field-grid">
-          <button type="button" class="field-pill" id="edit-firstname">Edit Firstname</button>
-          <button type="button" class="field-pill" id="edit-lastname">Edit Lastname</button>
+          <input class="text-input" type="text" id="first-name" name="first-name" placeholder="First name" required style="margin-bottom: 0;">
+          <input class="text-input" type="text" id="last-name" name="last-name" placeholder="Last name" required style="margin-bottom: 0;">
         </div>
 
-        <!-- Row 3: Save / Cancel -->
+        <input class="text-input" type="email" id="email" name="email" placeholder="Email" style="margin-top: 16px;">
+
         <div class="action-row">
           <button type="submit" class="field-pill">Save</button>
-          <button type="button" class="field-pill" onclick="window.location.href='contactsmain.html'">Cancel</button>
+          <button type="button" class="field-pill" id="delete-btn">Delete</button>
         </div>
+
+        <p id="form-message" class="empty-state" style="padding: 12px 0;" role="status"></p>
       </form>
     </main>
   </div>
 
+  <script src="api.js"></script>
+  <script>
+    setUserBadge();
+
+    const params = new URLSearchParams(window.location.search);
+    const contactId = params.get('id');
+    const messageEl = document.getElementById('form-message');
+    const firstNameEl = document.getElementById('first-name');
+    const lastNameEl = document.getElementById('last-name');
+    const phoneEl = document.getElementById('phone');
+    const emailEl = document.getElementById('email');
+    const avatarEl = document.getElementById('profile-avatar');
+    const idEl = document.getElementById('contact-id');
+
+    function updateAvatar() {
+      avatarEl.textContent = initials(firstNameEl.value, lastNameEl.value);
+    }
+
+    firstNameEl.addEventListener('input', updateAvatar);
+    lastNameEl.addEventListener('input', updateAvatar);
+
+    function fillForm(contact) {
+      idEl.value = contact.id;
+      firstNameEl.value = contact.first_name || '';
+      lastNameEl.value = contact.last_name || '';
+      phoneEl.value = contact.phone || '';
+      emailEl.value = contact.email || '';
+      updateAvatar();
+    }
+
+    async function loadContact() {
+      if (!contactId) {
+        showMessage(messageEl, 'No contact selected. Open one from All Contacts.', true);
+        return;
+      }
+
+      try {
+        const data = await apiPost('/list.php', {});
+        if (data.status !== 'success') {
+          if ((data.message || '').toLowerCase().includes('not logged in')) {
+            requireLoginRedirect();
+            return;
+          }
+          showMessage(messageEl, data.message || 'Failed to load contact', true);
+          return;
+        }
+
+        const contact = (data.contacts || []).find(function (c) {
+          return String(c.id) === String(contactId);
+        });
+
+        if (!contact) {
+          showMessage(messageEl, 'Contact not found', true);
+          return;
+        }
+
+        fillForm(contact);
+      } catch (err) {
+        showMessage(messageEl, err.message || 'Network error', true);
+      }
+    }
+
+    document.getElementById('edit-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      if (!idEl.value) {
+        showMessage(messageEl, 'No contact loaded', true);
+        return;
+      }
+
+      const body = {
+        id: Number(idEl.value),
+        first_name: firstNameEl.value.trim(),
+        last_name: lastNameEl.value.trim(),
+        phone: phoneEl.value.trim(),
+        email: emailEl.value.trim()
+      };
+
+      showMessage(messageEl, 'Saving…', false);
+
+      try {
+        const data = await apiPost('/edit.php', body);
+        if (data.status !== 'success') {
+          if ((data.message || '').toLowerCase().includes('not logged in')) {
+            requireLoginRedirect();
+            return;
+          }
+          showMessage(messageEl, data.message || 'Failed to save', true);
+          return;
+        }
+
+        showMessage(messageEl, 'Saved!', false);
+      } catch (err) {
+        showMessage(messageEl, err.message || 'Network error', true);
+      }
+    });
+
+    document.getElementById('delete-btn').addEventListener('click', async function () {
+      if (!idEl.value) {
+        showMessage(messageEl, 'No contact loaded', true);
+        return;
+      }
+
+      if (!confirm('Delete this contact?')) {
+        return;
+      }
+
+      showMessage(messageEl, 'Deleting…', false);
+
+      try {
+        const data = await apiPost('/delete.php', { id: Number(idEl.value) });
+        if (data.status !== 'success') {
+          if ((data.message || '').toLowerCase().includes('not logged in')) {
+            requireLoginRedirect();
+            return;
+          }
+          showMessage(messageEl, data.message || 'Failed to delete', true);
+          return;
+        }
+
+        window.location.href = 'contactsmain.html';
+      } catch (err) {
+        showMessage(messageEl, err.message || 'Network error', true);
+      }
+    });
+
+    loadContact();
+  </script>
 </body>
 </html>
