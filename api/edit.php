@@ -29,22 +29,33 @@ if (!is_array($inData))
 	respond('error', 'Invalid JSON');
 }
 
-if (!isset($inData['contact_id']) || !is_numeric($inData['contact_id']))
+// Accept either "id" (schema) or "contact_id" (older docs)
+$rawId = null;
+if (isset($inData['id']) && is_numeric($inData['id']))
 {
-	respond('error', 'contact_id is required');
+	$rawId = $inData['id'];
+}
+elseif (isset($inData['contact_id']) && is_numeric($inData['contact_id']))
+{
+	$rawId = $inData['contact_id'];
 }
 
-$name  = isset($inData['name'])  ? trim($inData['name'])  : '';
-$phone = isset($inData['phone']) ? trim($inData['phone']) : '';
-$email = isset($inData['email']) ? trim($inData['email']) : '';
-$notes = isset($inData['notes']) ? trim($inData['notes']) : '';
-
-if ($name === '')
+if ($rawId === null)
 {
-	respond('error', 'Name is required');
+	respond('error', 'id is required');
 }
 
-$contactId = (int)$inData['contact_id'];
+$firstName = isset($inData['first_name']) ? trim($inData['first_name']) : '';
+$lastName  = isset($inData['last_name'])  ? trim($inData['last_name'])  : '';
+$phone     = isset($inData['phone'])      ? trim($inData['phone'])      : '';
+$email     = isset($inData['email'])      ? trim($inData['email'])      : '';
+
+if ($firstName === '' || $lastName === '')
+{
+	respond('error', 'First name and last name are required');
+}
+
+$contactId = (int)$rawId;
 $userId = (int)$_SESSION['user_id'];
 
 $conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
@@ -54,7 +65,7 @@ if ($conn->connect_error)
 }
 
 $stmt = $conn->prepare(
-	'UPDATE contacts SET name = ?, phone = ?, email = ?, notes = ? WHERE contact_id = ? AND user_id = ?'
+	'UPDATE contacts SET first_name = ?, last_name = ?, email = ?, phone = ? WHERE id = ? AND user_id = ?'
 );
 
 if (!$stmt)
@@ -63,7 +74,7 @@ if (!$stmt)
 	respond('error', 'Failed to prepare statement');
 }
 
-$stmt->bind_param('ssssii', $name, $phone, $email, $notes, $contactId, $userId);
+$stmt->bind_param('ssssii', $firstName, $lastName, $email, $phone, $contactId, $userId);
 
 if (!$stmt->execute())
 {

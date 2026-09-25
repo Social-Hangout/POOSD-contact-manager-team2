@@ -29,12 +29,22 @@ if (!is_array($inData))
 	respond('error', 'Invalid JSON');
 }
 
-if (!isset($inData['contact_id']) || !is_numeric($inData['contact_id']))
+$rawId = null;
+if (isset($inData['id']) && is_numeric($inData['id']))
 {
-	respond('error', 'contact_id is required');
+	$rawId = $inData['id'];
+}
+elseif (isset($inData['contact_id']) && is_numeric($inData['contact_id']))
+{
+	$rawId = $inData['contact_id'];
 }
 
-$contactId = (int)$inData['contact_id'];
+if ($rawId === null)
+{
+	respond('error', 'id is required');
+}
+
+$contactId = (int)$rawId;
 $userId = (int)$_SESSION['user_id'];
 
 $conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
@@ -44,7 +54,7 @@ if ($conn->connect_error)
 }
 
 $stmt = $conn->prepare(
-	'DELETE FROM contacts WHERE contact_id = ? AND user_id = ?'
+	'DELETE FROM contacts WHERE id = ? AND user_id = ?'
 );
 
 if (!$stmt)

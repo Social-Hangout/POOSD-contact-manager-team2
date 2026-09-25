@@ -36,7 +36,7 @@ if ($conn->connect_error)
 }
 
 $stmt = $conn->prepare(
-	'SELECT contact_id, name, phone, email, notes FROM contacts WHERE user_id = ? ORDER BY name ASC'
+	'SELECT id, first_name, last_name, email, phone FROM contacts WHERE user_id = ? ORDER BY first_name ASC, last_name ASC'
 );
 
 if (!$stmt)
@@ -60,11 +60,11 @@ $contacts = array();
 while ($row = $result->fetch_assoc())
 {
 	$contacts[] = array(
-		'contact_id' => (int)$row['contact_id'],
-		'name'       => $row['name'],
-		'phone'      => $row['phone'],
+		'id'         => (int)$row['id'],
+		'first_name' => $row['first_name'],
+		'last_name'  => $row['last_name'],
 		'email'      => $row['email'],
-		'notes'      => $row['notes']
+		'phone'      => $row['phone']
 	);
 }
 

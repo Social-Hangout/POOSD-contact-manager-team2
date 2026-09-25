@@ -39,7 +39,7 @@ if($conn->connect_error){
     respond('error',null,'Database connection failed');
 }
 
-$stmt=$conn->prepare("SELECT first_name, last_name, email, phone  FROM contacts WHERE user_id=? AND (first_name LIKE ? OR last_name LIKE ? OR CONCAT(first_name,' ',last_name) LIKE ?)");
+$stmt=$conn->prepare("SELECT id, first_name, last_name, email, phone FROM contacts WHERE user_id=? AND (first_name LIKE ? OR last_name LIKE ? OR CONCAT(first_name,' ',last_name) LIKE ?)");
 $stmt->bind_param('isss', $user_id, $pattern ,$pattern,$pattern);
 $stmt->execute();
 $result=$stmt->get_result();
