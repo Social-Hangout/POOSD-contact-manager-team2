@@ -24,4 +24,8 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H "$SERVER_IP" >> ~/.ssh/known_hosts
           
-          rsync -avz --delete ./ "$SERVER_USER"@"$SERVER_IP":/var/www/html/
+          rsync -avz --delete --exclude 'api' \
+            ./frontend/ "$SERVER_USER"@"$SERVER_IP":/var/www/html/
+
+          rsync -avz --delete \
+            ./api/ "$SERVER_USER"@"$SERVER_IP":/var/www/html/api/
