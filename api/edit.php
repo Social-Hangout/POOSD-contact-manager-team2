@@ -58,7 +58,7 @@ if ($firstName === '' || $lastName === '')
 $contactId = (int)$rawId;
 $userId = (int)$_SESSION['user_id'];
 
-$conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
+$conn = new mysqli($db_host, $db_user, $db_pass, $db_name, $db_port);
 if ($conn->connect_error)
 {
 	respond('error', 'Database connection failed');
@@ -83,11 +83,30 @@ if (!$stmt->execute())
 	respond('error', 'Failed to edit contact');
 }
 
+// affected_rows can be 0 when values are unchanged — still success if the row exists
 if ($stmt->affected_rows === 0)
 {
 	$stmt->close();
+
+	$check = $conn->prepare('SELECT id FROM contacts WHERE id = ? AND user_id = ?');
+	if (!$check)
+	{
+		$conn->close();
+		respond('error', 'Failed to verify contact');
+	}
+
+	$check->bind_param('ii', $contactId, $userId);
+	$check->execute();
+	$exists = $check->get_result()->fetch_assoc();
+	$check->close();
 	$conn->close();
-	respond('error', 'Contact not found');
+
+	if (!$exists)
+	{
+		respond('error', 'Contact not found');
+	}
+
+	respond('success');
 }
 
 $stmt->close();

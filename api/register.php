@@ -39,7 +39,7 @@ $password_hash=password_hash($reg_pass,PASSWORD_DEFAULT);
 
 require_once __DIR__ . '/../config.php';
 
-$conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
+$conn = new mysqli($db_host, $db_user, $db_pass, $db_name, $db_port);
 
 if($conn->connect_error){
     respond('error',null,'Database connection failed');
