@@ -1,7 +1,6 @@
 <?php
 header('Content-Type: application/json');
 session_start();
-
 require_once __DIR__ . '/../../config.php';
 
 function respond($status, $contacts = null, $message = '')
@@ -36,7 +35,8 @@ if ($conn->connect_error)
 }
 
 $stmt = $conn->prepare(
-	'SELECT id, first_name, last_name, email, phone FROM contacts WHERE user_id = ? AND is_deleted = 0 ORDER BY first_name ASC, last_name ASC');
+	'SELECT id, first_name, last_name, email, phone FROM contacts WHERE user_id = ? AND is_deleted = 1 ORDER BY deleted_at DESC'
+);
 
 if (!$stmt)
 {
@@ -50,7 +50,7 @@ if (!$stmt->execute())
 {
 	$stmt->close();
 	$conn->close();
-	respond('error', null, 'Failed to list contacts');
+	respond('error', null, 'Failed to list trash');
 }
 
 $result = $stmt->get_result();

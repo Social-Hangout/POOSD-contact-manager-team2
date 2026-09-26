@@ -52,11 +52,9 @@ if ($conn->connect_error)
 {
 	respond('error', 'Database connection failed');
 }
-
 $stmt = $conn->prepare(
-	'DELETE FROM contacts WHERE id = ? AND user_id = ?'
+	'UPDATE contacts SET is_deleted = 1, deleted_at = NOW() WHERE id = ? AND user_id = ? AND is_deleted = 0'
 );
-
 if (!$stmt)
 {
 	$conn->close();
