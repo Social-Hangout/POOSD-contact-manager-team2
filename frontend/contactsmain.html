@@ -1,67 +1,40 @@
-<!--
-  contactsmain.html — "Contacts main page" wireframe.
-
-  This is the page a logged-in user lands on: a search bar and
-  a list of their contacts. Every page in this project shares
-  the same header + sidebar markup. they all look consistent.
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Contacts – Follow</title>
-  <!-- This line is what connects the page to style.css.
-       Without it, everything below would render as plain
-       black-on-white unstyled text. -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- ===== HEADER: logo, nav links, logged-in user badge ===== -->
   <header class="site-header">
     <img class="logo" src="WebsiteLogo.png" alt="Company logo">
     <nav class="main-nav">
       <a href="contactsmain.html">Home</a>
-      <a href="#">Privacy</a>
-      <a href="#">About</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="about.html">About</a>
     </nav>
-    <!-- HOOK: after login, JavaScript should set this element's
-         text to the real logged-in user's name, e.g.
-         document.getElementById("user-name").textContent =
-           user.firstName + " " + user.lastName;
-         Until that's wired up, it just shows this placeholder. -->
-    <a class="user-badge" id="user-name" href="userprofile.html">Firstname Lastname</a>
+    <a class="user-badge" id="user-name" href="userprofile.html">Account</a>
   </header>
 
-  <!-- ===== BODY: sidebar + main content, side by side ===== -->
   <div class="page-body">
-
-    <!-- Sidebar links. "Create Contact" goes to the form page;
-         "All Contacts" reloads this page; "Trash" would show
-         deleted contacts once that feature exists. -->
     <aside class="sidebar">
       <a class="sidebar-btn" href="create-contact.html">Create Contact</a>
       <a class="sidebar-btn" href="contactsmain.html">All Contacts</a>
       <a class="sidebar-btn" href="trashpage.html">Trash</a>
     </aside>
 
-    <!-- Main panel: search + contact list -->
     <main class="content">
-      <!-- HOOK: this search box should trigger a call to your
-           search API as the user types (or on Enter), which
-           returns matching contacts. Whoever builds that JS
-           can find this input by id="contact-search". -->
       <input class="search-bar" type="text" id="contact-search" placeholder="Search contacts...">
+      <p id="list-message" class="empty-state" style="display:none; padding: 0 0 12px;" role="status"></p>
 
-      <!-- AI-assisted: empty-state + <template> approach for the contact
-     list suggested by Claude, to avoid hardcoding sample contacts -->
       <div class="contact-list" id="contact-list">
         <p class="empty-state" id="empty-state">
           You don't have any contacts yet. Click "Create Contact" to add one.
         </p>
       </div>
 
-      
       <template id="contact-row-template">
         <a class="contact-row" href="userprofile.html">
           <div class="avatar"></div>
@@ -71,17 +44,105 @@
           </div>
         </a>
       </template>
-      <!-- Example of a cloned + filled-in row, for reference only:
-      <a class="contact-row" href="userprofile.html">
-        <div class="avatar">JS</div>
-        <div>
-          <div class="contact-name">Jane Smith</div>
-          <div class="contact-phone">555-123-4567</div>
-        </div>
-      </a>
-      -->
     </main>
   </div>
 
+  <script src="api.js"></script>
+  <script>
+    const listEl = document.getElementById('contact-list');
+    const emptyEl = document.getElementById('empty-state');
+    const template = document.getElementById('contact-row-template');
+    const messageEl = document.getElementById('list-message');
+    let searchTimer = null;
+
+    setUserBadge();
+
+    function renderContacts(contacts) {
+      listEl.querySelectorAll('.contact-row').forEach(function (row) {
+        row.remove();
+      });
+
+      if (!contacts || contacts.length === 0) {
+        emptyEl.style.display = 'block';
+        emptyEl.textContent = document.getElementById('contact-search').value.trim()
+          ? 'No contacts match your search.'
+          : 'You don\'t have any contacts yet. Click "Create Contact" to add one.';
+        return;
+      }
+
+      emptyEl.style.display = 'none';
+
+      contacts.forEach(function (contact) {
+        const node = template.content.cloneNode(true);
+        const row = node.querySelector('.contact-row');
+        const avatar = node.querySelector('.avatar');
+        const nameEl = node.querySelector('.contact-name');
+        const phoneEl = node.querySelector('.contact-phone');
+
+        row.href = 'userprofile.html?id=' + encodeURIComponent(contact.id);
+        avatar.textContent = initials(contact.first_name, contact.last_name);
+        nameEl.textContent = (contact.first_name + ' ' + contact.last_name).trim();
+        phoneEl.textContent = contact.phone || '';
+
+        listEl.appendChild(node);
+      });
+    }
+
+    async function loadAllContacts() {
+      messageEl.style.display = 'none';
+      try {
+        const data = await apiPost('/list.php', {});
+        if (data.status !== 'success') {
+          if ((data.message || '').toLowerCase().includes('not logged in')) {
+            requireLoginRedirect();
+            return;
+          }
+          messageEl.style.display = 'block';
+          showMessage(messageEl, data.message || 'Failed to load contacts', true);
+          return;
+        }
+        renderContacts(data.contacts || []);
+      } catch (err) {
+        messageEl.style.display = 'block';
+        showMessage(messageEl, err.message || 'Network error', true);
+      }
+    }
+
+    async function searchContacts(term) {
+      messageEl.style.display = 'none';
+      try {
+        const data = await apiGet('/search.php?q=' + encodeURIComponent(term));
+        if (data.status !== 'success') {
+          if ((data.status || '').includes('unauth') || (data.message || '').toLowerCase().includes('unauth')) {
+            requireLoginRedirect();
+            return;
+          }
+          messageEl.style.display = 'block';
+          showMessage(messageEl, data.message || 'Search failed', true);
+          return;
+        }
+        renderContacts(data.contacts || []);
+      } catch (err) {
+        messageEl.style.display = 'block';
+        showMessage(messageEl, err.message || 'Network error', true);
+      }
+    }
+
+    document.getElementById('contact-search').addEventListener('input', function (e) {
+      const term = e.target.value.trim();
+      clearTimeout(searchTimer);
+
+      if (term === '') {
+        loadAllContacts();
+        return;
+      }
+
+      searchTimer = setTimeout(function () {
+        searchContacts(term);
+      }, 250);
+    });
+
+    loadAllContacts();
+  </script>
 </body>
 </html>

@@ -10,7 +10,7 @@
   <title>Log in – Follow</title>
 </head>
 <body>
- 
+
   <header class="site-header">
     <img class="logo" src="WebsiteLogo.png" alt="Follow">
     <nav class="main-nav">
@@ -20,28 +20,54 @@
     </nav>
     <a class="login-btn" href="logIn.html">Log in</a>
   </header>
- 
+
   <main class="auth-page">
     <h1 class="auth-title">Welcome!</h1>
- 
-    <form class="auth-form" action="main.html" method="post">
+
+    <form class="auth-form" id="login-form">
       <div class="form-field">
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" autocomplete="email" required>
       </div>
- 
+
       <div class="form-field">
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" autocomplete="current-password" required>
       </div>
- 
+
+      <p id="form-message" class="requirements" role="status"></p>
       <button type="submit" class="green-btn auth-btn">Log in</button>
     </form>
- 
+
     <div class="tree-branch">
       <img src="Group 1.png" alt="">
     </div>
   </main>
- 
+
+  <script src="api.js"></script>
+  <script>
+    document.getElementById('login-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const messageEl = document.getElementById('form-message');
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      showMessage(messageEl, 'Logging in…', false);
+
+      try {
+        const data = await apiPost('/login.php', { email, password });
+        if (data.status !== 'success') {
+          showMessage(messageEl, data.message || 'Login failed', true);
+          return;
+        }
+
+        sessionStorage.setItem('user_id', String(data.user_id || ''));
+        sessionStorage.setItem('user_label', email);
+        window.location.href = 'contactsmain.html';
+      } catch (err) {
+        showMessage(messageEl, err.message || 'Network error', true);
+      }
+    });
+  </script>
 </body>
 </html>

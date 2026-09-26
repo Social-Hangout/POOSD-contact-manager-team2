@@ -29,14 +29,14 @@ if (!isset($_SESSION['user_id']))
 
 $userId = (int)$_SESSION['user_id'];
 
-$conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
+$conn = new mysqli($db_host, $db_user, $db_pass, $db_name, $db_port);
 if ($conn->connect_error)
 {
 	respond('error', null, 'Database connection failed');
 }
 
 $stmt = $conn->prepare(
-	'SELECT contact_id, name, phone, email, notes FROM contacts WHERE user_id = ? ORDER BY name ASC'
+	'SELECT id, first_name, last_name, email, phone FROM contacts WHERE user_id = ? ORDER BY first_name ASC, last_name ASC'
 );
 
 if (!$stmt)
@@ -60,11 +60,11 @@ $contacts = array();
 while ($row = $result->fetch_assoc())
 {
 	$contacts[] = array(
-		'contact_id' => (int)$row['contact_id'],
-		'name'       => $row['name'],
-		'phone'      => $row['phone'],
+		'id'         => (int)$row['id'],
+		'first_name' => $row['first_name'],
+		'last_name'  => $row['last_name'],
 		'email'      => $row['email'],
-		'notes'      => $row['notes']
+		'phone'      => $row['phone']
 	);
 }
 

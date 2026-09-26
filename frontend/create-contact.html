@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Create Contact – Follow</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -11,11 +12,10 @@
     <img class="logo" src="WebsiteLogo.png" alt="Company logo">
     <nav class="main-nav">
       <a href="contactsmain.html">Home</a>
-      <a href="#">Privacy</a>
-      <a href="#">About</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="about.html">About</a>
     </nav>
-    <!-- Hardcoded for now, but later JS will fill in with actual First and Last name. -->
-    <div class="user-badge" id="user-name">Firstname Lastname</div>
+    <div class="user-badge" id="user-name">Account</div>
   </header>
 
   <div class="page-body">
@@ -26,36 +26,75 @@
     </aside>
 
     <main class="content">
-
-      <!-- Back / Save buttons on the wireframe's top corners.
-           These are plain <button> elements inside a <form>,
-           so "Save" naturally submits the form once a teammate
-           wires up the form's action/JavaScript. -->
-      <form>
+      <form id="create-form">
         <div class="form-toolbar">
           <button type="button" class="pill-btn" onclick="window.location.href='contactsmain.html'">Back</button>
           <button type="submit" class="pill-btn">Save</button>
         </div>
 
-        <!-- HOOK: this is a brand-new contact with no name typed
-             in yet, so it starts blank (no initials to show).
-             Once JS is added, it should update this circle's
-             text live as the user types their First/Last name
-             below  -->
         <div class="avatar" id="new-contact-avatar" style="margin-bottom: 20px;"></div>
 
-        
         <label for="first-name" class="visually-hidden">First name</label>
-        <input class="text-input" type="text" id="first-name" name="first-name" placeholder="Enter First Name">
+        <input class="text-input" type="text" id="first-name" name="first-name" placeholder="Enter First Name" required>
 
         <label for="last-name" class="visually-hidden">Last name</label>
-        <input class="text-input" type="text" id="last-name" name="last-name" placeholder="Enter Last Name">
+        <input class="text-input" type="text" id="last-name" name="last-name" placeholder="Enter Last Name" required>
 
         <label for="phone" class="visually-hidden">Phone number</label>
         <input class="text-input" type="tel" id="phone" name="phone" placeholder="Enter Phone Number">
+
+        <label for="email" class="visually-hidden">Email</label>
+        <input class="text-input" type="email" id="email" name="email" placeholder="Enter Email">
+
+        <p id="form-message" class="empty-state" style="padding: 8px 0;" role="status"></p>
       </form>
     </main>
   </div>
 
+  <script src="api.js"></script>
+  <script>
+    setUserBadge();
+
+    const firstNameEl = document.getElementById('first-name');
+    const lastNameEl = document.getElementById('last-name');
+    const avatarEl = document.getElementById('new-contact-avatar');
+
+    function updateAvatar() {
+      avatarEl.textContent = initials(firstNameEl.value, lastNameEl.value);
+    }
+
+    firstNameEl.addEventListener('input', updateAvatar);
+    lastNameEl.addEventListener('input', updateAvatar);
+
+    document.getElementById('create-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const messageEl = document.getElementById('form-message');
+
+      const body = {
+        first_name: firstNameEl.value.trim(),
+        last_name: lastNameEl.value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        email: document.getElementById('email').value.trim()
+      };
+
+      showMessage(messageEl, 'Saving…', false);
+
+      try {
+        const data = await apiPost('/add.php', body);
+        if (data.status !== 'success') {
+          if ((data.message || '').toLowerCase().includes('not logged in')) {
+            requireLoginRedirect();
+            return;
+          }
+          showMessage(messageEl, data.message || 'Failed to add contact', true);
+          return;
+        }
+
+        window.location.href = 'contactsmain.html';
+      } catch (err) {
+        showMessage(messageEl, err.message || 'Network error', true);
+      }
+    });
+  </script>
 </body>
 </html>

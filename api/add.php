@@ -10,7 +10,7 @@ function respond($status, $contactId = null, $message = '')
 
 	if ($contactId !== null)
 	{
-		$payload['contact_id'] = (int)$contactId;
+		$payload['id'] = (int)$contactId;
 	}
 
 	if ($message !== '')
@@ -34,26 +34,26 @@ if (!is_array($inData))
 	respond('error', null, 'Invalid JSON');
 }
 
-$name  = isset($inData['name'])  ? trim($inData['name'])  : '';
-$phone = isset($inData['phone']) ? trim($inData['phone']) : '';
-$email = isset($inData['email']) ? trim($inData['email']) : '';
-$notes = isset($inData['notes']) ? trim($inData['notes']) : '';
+$firstName = isset($inData['first_name']) ? trim($inData['first_name']) : '';
+$lastName  = isset($inData['last_name'])  ? trim($inData['last_name'])  : '';
+$phone     = isset($inData['phone'])      ? trim($inData['phone'])      : '';
+$email     = isset($inData['email'])      ? trim($inData['email'])      : '';
 
-if ($name === '')
+if ($firstName === '' || $lastName === '')
 {
-	respond('error', null, 'Name is required');
+	respond('error', null, 'First name and last name are required');
 }
 
 $userId = (int)$_SESSION['user_id'];
 
-$conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
+$conn = new mysqli($db_host, $db_user, $db_pass, $db_name, $db_port);
 if ($conn->connect_error)
 {
 	respond('error', null, 'Database connection failed');
 }
 
 $stmt = $conn->prepare(
-	'INSERT INTO contacts (user_id, name, phone, email, notes) VALUES (?, ?, ?, ?, ?)'
+	'INSERT INTO contacts (user_id, first_name, last_name, email, phone) VALUES (?, ?, ?, ?, ?)'
 );
 
 if (!$stmt)
@@ -62,7 +62,7 @@ if (!$stmt)
 	respond('error', null, 'Failed to prepare statement');
 }
 
-$stmt->bind_param('issss', $userId, $name, $phone, $email, $notes);
+$stmt->bind_param('issss', $userId, $firstName, $lastName, $email, $phone);
 
 if (!$stmt->execute())
 {
