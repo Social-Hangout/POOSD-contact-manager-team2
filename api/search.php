@@ -31,7 +31,7 @@ $pattern='%' . $search_name . '%';
 
 
 
-require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../../config.php';
 
 $conn = new mysqli($db_host, $db_user, $db_pass, $db_name, $db_port);
 
