@@ -52,5 +52,41 @@
     </main>
   </div>
 
+<script src="api.js"></script>
+<script>
+async function loadTrash() {
+  const listEl = document.getElementById('trash-list');
+  const emptyState = document.getElementById('trash-empty-state');
+  const countEl = document.getElementById('trash-count');
+  const template = document.getElementById('trash-row-template');
+
+  try {
+    const data = await apiRequest('/trash-list.php', { method: 'GET' });
+
+    if (data.status !== 'success' || !data.contacts || data.contacts.length === 0) {
+      emptyState.style.display = 'block';
+      countEl.textContent = '0';
+      return;
+    }
+
+    emptyState.style.display = 'none';
+    countEl.textContent = data.contacts.length;
+
+    data.contacts.forEach(contact => {
+      const clone = template.content.cloneNode(true);
+      const initials = (contact.first_name[0] || '') + (contact.last_name[0] || '');
+      clone.querySelector('.avatar').textContent = initials.toUpperCase();
+      clone.querySelector('.contact-name').textContent = contact.first_name + ' ' + contact.last_name;
+      clone.querySelector('.contact-phone').textContent = contact.phone || '';
+      listEl.appendChild(clone);
+    });
+  } catch (err) {
+    emptyState.textContent = 'Something went wrong loading trash.';
+    emptyState.style.display = 'block';
+  }
+}
+
+loadTrash();
+</script>
 </body>
 </html>
