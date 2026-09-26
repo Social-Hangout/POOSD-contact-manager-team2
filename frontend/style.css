@@ -119,7 +119,11 @@ input:focus-visible
 {
   position: relative;
   min-height: calc(100vh - var(--header-height));
-  padding: 48px 24px 0;
+  padding: 48px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   overflow: hidden;
 }
@@ -127,12 +131,21 @@ input:focus-visible
 {
   position: relative;
   z-index: 1;
-  margin: 0 auto;
-  max-width: 14ch;
+  margin: 0;
+  max-width: 28ch;
+  width: 100%;
+  text-align: center;
   color: var(--pill-green);
-  font-size: clamp(2.5rem, 8vw, 5.5rem);
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
   font-weight: 700;
-  line-height: 1.1;
+  line-height: 1.3;
+}
+.hero-title h2
+{
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+  text-align: center;
 }
 .signup-btn
 {
@@ -192,8 +205,25 @@ input:focus-visible
 .auth-btn { align-self: center; margin-top: 8px; padding: 10px 44px; font-size: 1rem; }
 
 /* ===== PUBLIC: ABOUT + PRIVACY ===== */
-.info-page { max-width: 720px; margin: 0 auto; padding: 48px 24px 64px; }
-.info-logo { display: block; width: min(320px, 70%); height: auto; margin: 0 auto 32px; }
+.info-page
+{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 24px 64px;
+}
+.info-logo
+{
+  display: block;
+  width: min(320px, 70%);
+  height: auto;
+  margin: 0 0 32px;
+  border: none;
+  outline: none;
+  background: transparent;
+}
 .info-page h3
 {
   margin: 0 0 20px;
@@ -208,9 +238,11 @@ input:focus-visible
 .info-page li
 {
   margin: 0 0 16px;
+  width: 100%;
   font-size: 0.95rem;
   line-height: 1.65;
   color: var(--text-dark);
+  text-align: center;
 }
 
 /* ===== DASHBOARD: PAGE LAYOUT ===== */

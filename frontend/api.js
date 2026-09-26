@@ -1,9 +1,9 @@
 /* Shared API helpers for the Contact Manager frontend.
    Uses session cookies (credentials: 'include') so login persists across pages.
-   Serve the site from the project root, e.g. php -S localhost:8000
-   then open /frontend/logIn.html — paths assume /api is one level up. */
+   API_BASE is absolute so it works both locally (php -S from repo root)
+   and on the deployed server (frontend at /var/www/html, api at /api). */
 
-const API_BASE = '../api';
+const API_BASE = '/api';
 
 async function apiRequest(path, options = {}) {
   const config = {
