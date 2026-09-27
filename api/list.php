@@ -23,6 +23,7 @@ function respond($status, $contacts = null, $message = '')
 }
 
 // Body is optional for list; allow empty POST
+$inData = null;
 $raw = file_get_contents('php://input');
 if ($raw !== '' && $raw !== false)
 {
@@ -41,7 +42,7 @@ if ($conn->connect_error)
 
 $userId = requireUserIdFromToken($conn, function ($message) {
 	respond('error', null, $message);
-});
+}, $inData);
 
 $stmt = $conn->prepare(
 	'SELECT id, first_name, last_name, email, phone FROM contacts WHERE user_id = ? AND is_deleted = 0 ORDER BY first_name ASC, last_name ASC');
