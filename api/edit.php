@@ -59,7 +59,7 @@ if ($conn->connect_error)
 
 $userId = requireUserIdFromToken($conn, function ($message) {
 	respond('error', $message);
-});
+}, $inData);
 
 $stmt = $conn->prepare(
 	'UPDATE contacts SET first_name = ?, last_name = ?, email = ?, phone = ? WHERE id = ? AND user_id = ?'

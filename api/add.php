@@ -47,7 +47,7 @@ if ($conn->connect_error)
 
 $userId = requireUserIdFromToken($conn, function ($message) {
 	respond('error', null, $message);
-});
+}, $inData);
 
 $stmt = $conn->prepare(
 	'INSERT INTO contacts (user_id, first_name, last_name, email, phone) VALUES (?, ?, ?, ?, ?)'

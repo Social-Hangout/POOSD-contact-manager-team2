@@ -1,15 +1,27 @@
 <?php
 /**
  * Token auth helpers for the Contacts API.
- * Clients send X-API-Key (or Authorization: Bearer <token>) from login.
+ * Prefer X-API-Key / Bearer header; also accept api_token in JSON body or ?api_token=
+ * (Apache sometimes does not expose custom headers to PHP).
  * Never trust a client-supplied user_id.
  */
 
-function getRequestApiToken()
+function getRequestApiToken($body = null)
 {
 	if (!empty($_SERVER['HTTP_X_API_KEY']))
 	{
 		return trim($_SERVER['HTTP_X_API_KEY']);
+	}
+
+	if (function_exists('getallheaders'))
+	{
+		foreach (getallheaders() as $name => $value)
+		{
+			if (strcasecmp($name, 'X-API-Key') === 0)
+			{
+				return trim($value);
+			}
+		}
 	}
 
 	$auth = '';
@@ -25,6 +37,16 @@ function getRequestApiToken()
 	if ($auth !== '' && preg_match('/Bearer\s+(\S+)/i', $auth, $matches))
 	{
 		return trim($matches[1]);
+	}
+
+	if (is_array($body) && !empty($body['api_token']))
+	{
+		return trim((string)$body['api_token']);
+	}
+
+	if (!empty($_GET['api_token']))
+	{
+		return trim((string)$_GET['api_token']);
 	}
 
 	return '';
@@ -57,14 +79,9 @@ function lookupUserIdByToken($conn, $token)
 	return (int)$row['id'];
 }
 
-/**
- * Returns authenticated user id, or writes a JSON error and exits.
- * $respond must be a callable like: function ($status, ..., $message).
- * For simple StatusResponse-style endpoints, pass a wrapper.
- */
-function requireUserIdFromToken($conn, $onUnauthorized)
+function requireUserIdFromToken($conn, $onUnauthorized, $body = null)
 {
-	$token = getRequestApiToken();
+	$token = getRequestApiToken($body);
 	if ($token === '')
 	{
 		$onUnauthorized('Missing API token');

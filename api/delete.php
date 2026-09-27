@@ -49,7 +49,7 @@ if ($conn->connect_error)
 
 $userId = requireUserIdFromToken($conn, function ($message) {
 	respond('error', $message);
-});
+}, $inData);
 
 $stmt = $conn->prepare(
 	'UPDATE contacts SET is_deleted = 1, deleted_at = NOW() WHERE id = ? AND user_id = ? AND is_deleted = 0'

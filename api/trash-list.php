@@ -22,6 +22,17 @@ function respond($status, $contacts = null, $message = '')
 	exit;
 }
 
+$inData = null;
+$raw = file_get_contents('php://input');
+if ($raw !== '' && $raw !== false)
+{
+	$decoded = json_decode($raw, true);
+	if (is_array($decoded))
+	{
+		$inData = $decoded;
+	}
+}
+
 $conn = new mysqli($db_host, $db_user, $db_pass, $db_name, $db_port);
 if ($conn->connect_error)
 {
@@ -30,7 +41,7 @@ if ($conn->connect_error)
 
 $userId = requireUserIdFromToken($conn, function ($message) {
 	respond('error', null, $message);
-});
+}, $inData);
 
 $stmt = $conn->prepare(
 	'SELECT id, first_name, last_name, email, phone FROM contacts WHERE user_id = ? AND is_deleted = 1 ORDER BY deleted_at DESC'
