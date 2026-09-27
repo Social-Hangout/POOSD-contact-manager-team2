@@ -62,14 +62,24 @@ async function apiRequest(path, options = {}) {
 }
 
 function apiPost(path, body) {
+  const payload = body && typeof body === 'object' ? Object.assign({}, body) : {};
+  const token = getToken();
+  if (token) {
+    payload.api_token = token;
+  }
   return apiRequest(path, {
     method: 'POST',
-    body: JSON.stringify(body == null ? {} : body)
+    body: JSON.stringify(payload)
   });
 }
 
 function apiGet(path) {
-  return apiRequest(path, { method: 'GET' });
+  const token = getToken();
+  let url = path;
+  if (token) {
+    url += (path.indexOf('?') >= 0 ? '&' : '?') + 'api_token=' + encodeURIComponent(token);
+  }
+  return apiRequest(url, { method: 'GET' });
 }
 
 function initials(firstName, lastName) {

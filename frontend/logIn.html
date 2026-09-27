@@ -61,6 +61,11 @@
           return;
         }
 
+        if (!data.token) {
+          showMessage(messageEl, 'Login succeeded but no API token was returned. Deploy may be incomplete.', true);
+          return;
+        }
+
         setAuth(data.user_id, data.token, email);
         window.location.href = 'contactsmain.html';
       } catch (err) {
