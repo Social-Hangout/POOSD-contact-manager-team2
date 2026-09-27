@@ -8,6 +8,12 @@ MySQL database for the Contact Manager. The tables are defined in `schema.sql`.
 mysql -u <user> -p <database_name> < db/schema.sql
 ```
 
+If the database already exists without `api_token`, run:
+
+```bash
+mysql -u <user> -p <database_name> < db/migrate_api_token.sql
+```
+
 ## Tables
 
 ### users
@@ -17,7 +23,8 @@ mysql -u <user> -p <database_name> < db/schema.sql
 | id            | INT UNSIGNED  | Primary key, auto-increment |
 | email         | VARCHAR(255)  | Required, unique            |
 | username      | VARCHAR(50)   | Required, unique            |
-| password_hash | VARCHAR (255) | Required                    |
+| password_hash | VARCHAR(255)  | Required                    |
+| api_token     | VARCHAR(64)   | Optional, unique; set on login for API auth |
 | created_at    | DATETIME      | Auto-set on insert          |
 
 ### contacts

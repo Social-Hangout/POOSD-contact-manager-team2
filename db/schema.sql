@@ -6,11 +6,13 @@ CREATE TABLE IF NOT EXISTS users (
     email           VARCHAR(255) NOT NULL,
     username        VARCHAR(50)  NOT NULL,
     password_hash   VARCHAR(255) NOT NULL,
+    api_token       VARCHAR(64)  NULL DEFAULT NULL,
     created_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id),
     UNIQUE KEY uq_users_email (email),
-    UNIQUE KEY uq_users_username (username)
+    UNIQUE KEY uq_users_username (username),
+    UNIQUE KEY uq_users_api_token (api_token)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS contacts (
