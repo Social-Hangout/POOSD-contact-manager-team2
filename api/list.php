@@ -1,6 +1,5 @@
 <?php
 header('Content-Type: application/json');
-session_start();
 
 require_once __DIR__ . '/../../config.php';
 
@@ -22,12 +21,19 @@ function respond($status, $contacts = null, $message = '')
 	exit;
 }
 
-if (!isset($_SESSION['user_id']))
+$inData = json_decode(file_get_contents('php://input'), true);
+
+if (!is_array($inData))
 {
-	respond('error', null, 'Not logged in');
+	respond('error', null, 'Invalid JSON');
 }
 
-$userId = (int)$_SESSION['user_id'];
+if (!isset($inData['user_id']) || !is_numeric($inData['user_id']) || (int)$inData['user_id'] <= 0)
+{
+	respond('error', null, 'Missing user_id');
+}
+
+$userId = (int)$inData['user_id'];
 
 $conn = new mysqli($db_host, $db_user, $db_pass, $db_name, $db_port);
 if ($conn->connect_error)
