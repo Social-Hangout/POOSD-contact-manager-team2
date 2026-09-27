@@ -2,6 +2,7 @@
 header('Content-Type: application/json');
 
 require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/auth.php';
 
 function respond($status, $contactId = null, $message = '')
 {
@@ -28,13 +29,6 @@ if (!is_array($inData))
 	respond('error', null, 'Invalid JSON');
 }
 
-if (!isset($inData['user_id']) || !is_numeric($inData['user_id']) || (int)$inData['user_id'] <= 0)
-{
-	respond('error', null, 'Missing user_id');
-}
-
-$userId = (int)$inData['user_id'];
-
 $firstName = isset($inData['first_name']) ? trim($inData['first_name']) : '';
 $lastName  = isset($inData['last_name'])  ? trim($inData['last_name'])  : '';
 $phone     = isset($inData['phone'])      ? trim($inData['phone'])      : '';
@@ -50,6 +44,10 @@ if ($conn->connect_error)
 {
 	respond('error', null, 'Database connection failed');
 }
+
+$userId = requireUserIdFromToken($conn, function ($message) {
+	respond('error', null, $message);
+});
 
 $stmt = $conn->prepare(
 	'INSERT INTO contacts (user_id, first_name, last_name, email, phone) VALUES (?, ?, ?, ?, ?)'

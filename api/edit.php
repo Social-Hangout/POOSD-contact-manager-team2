@@ -2,6 +2,7 @@
 header('Content-Type: application/json');
 
 require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/auth.php';
 
 function respond($status, $message = '')
 {
@@ -23,14 +24,6 @@ if (!is_array($inData))
 	respond('error', 'Invalid JSON');
 }
 
-if (!isset($inData['user_id']) || !is_numeric($inData['user_id']) || (int)$inData['user_id'] <= 0)
-{
-	respond('error', 'Missing user_id');
-}
-
-$userId = (int)$inData['user_id'];
-
-// Accept either "id" (schema) or "contact_id" (older docs)
 $rawId = null;
 if (isset($inData['id']) && is_numeric($inData['id']))
 {
@@ -64,6 +57,10 @@ if ($conn->connect_error)
 	respond('error', 'Database connection failed');
 }
 
+$userId = requireUserIdFromToken($conn, function ($message) {
+	respond('error', $message);
+});
+
 $stmt = $conn->prepare(
 	'UPDATE contacts SET first_name = ?, last_name = ?, email = ?, phone = ? WHERE id = ? AND user_id = ?'
 );
@@ -83,7 +80,6 @@ if (!$stmt->execute())
 	respond('error', 'Failed to edit contact');
 }
 
-// affected_rows can be 0 when values are unchanged — still success if the row exists
 if ($stmt->affected_rows === 0)
 {
 	$stmt->close();

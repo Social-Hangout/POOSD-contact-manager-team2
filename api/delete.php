@@ -2,6 +2,7 @@
 header('Content-Type: application/json');
 
 require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/auth.php';
 
 function respond($status, $message = '')
 {
@@ -22,13 +23,6 @@ if (!is_array($inData))
 {
 	respond('error', 'Invalid JSON');
 }
-
-if (!isset($inData['user_id']) || !is_numeric($inData['user_id']) || (int)$inData['user_id'] <= 0)
-{
-	respond('error', 'Missing user_id');
-}
-
-$userId = (int)$inData['user_id'];
 
 $rawId = null;
 if (isset($inData['id']) && is_numeric($inData['id']))
@@ -52,6 +46,11 @@ if ($conn->connect_error)
 {
 	respond('error', 'Database connection failed');
 }
+
+$userId = requireUserIdFromToken($conn, function ($message) {
+	respond('error', $message);
+});
+
 $stmt = $conn->prepare(
 	'UPDATE contacts SET is_deleted = 1, deleted_at = NOW() WHERE id = ? AND user_id = ? AND is_deleted = 0'
 );
