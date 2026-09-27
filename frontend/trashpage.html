@@ -15,7 +15,10 @@
       <a href="#">About</a>
     </nav>
     <!-- Hardcoded for now, but later JS will fill in with actual First and Last name. -->
-    <a class="user-badge" id="user-name" href="userprofile.html">Firstname Lastname</a>
+    <div class="header-actions">
+      <span class="user-badge" id="user-name">Account</span>
+      <a class="login-btn" href="#" onclick="logout(); return false;">Log out</a>
+    </div>
   </header>
 
   <div class="page-body">
@@ -54,6 +57,7 @@
 
 <script src="api.js"></script>
 <script>
+setUserBadge();
 document.getElementById('empty-trash-btn').addEventListener('click', async function () {
   const confirmed = confirm('Permanently delete all trashed contacts? This cannot be undone.');
   if (!confirmed) return;
