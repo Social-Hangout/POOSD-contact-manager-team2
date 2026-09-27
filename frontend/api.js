@@ -1,17 +1,51 @@
 /* Shared API helpers for the Contact Manager frontend.
-   Auth is stateless: store user_id in localStorage after login and
-   send it on every contact API request (SwaggerHub-friendly). */
+   Auth uses a token from login (X-API-Key). The server derives user_id
+   from the token — the client never sends user_id for contact ops. */
 
 const API_BASE = '/api';
 
+function getToken() {
+  return localStorage.getItem('api_token') || '';
+}
+
+function setAuth(userId, token, label) {
+  if (userId != null) {
+    localStorage.setItem('user_id', String(userId));
+  }
+  if (token) {
+    localStorage.setItem('api_token', token);
+  }
+  if (label) {
+    localStorage.setItem('user_label', label);
+  }
+}
+
+function clearAuth() {
+  localStorage.removeItem('user_id');
+  localStorage.removeItem('api_token');
+  localStorage.removeItem('user_label');
+}
+
+function logout() {
+  clearAuth();
+  window.location.href = 'logIn.html';
+}
+
 async function apiRequest(path, options = {}) {
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(options.headers || {})
+  };
+
+  const token = getToken();
+  if (token) {
+    headers['X-API-Key'] = token;
+  }
+
   const config = {
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers || {})
-    },
-    ...options
+    ...options,
+    headers
   };
 
   const response = await fetch(`${API_BASE}${path}`, config);
@@ -30,38 +64,12 @@ async function apiRequest(path, options = {}) {
 function apiPost(path, body) {
   return apiRequest(path, {
     method: 'POST',
-    body: JSON.stringify(body)
+    body: JSON.stringify(body == null ? {} : body)
   });
 }
 
 function apiGet(path) {
   return apiRequest(path, { method: 'GET' });
-}
-
-function getUserId() {
-  const raw = localStorage.getItem('user_id');
-  const id = Number(raw);
-  return Number.isInteger(id) && id > 0 ? id : null;
-}
-
-function setUserId(userId) {
-  localStorage.setItem('user_id', String(userId));
-}
-
-function clearAuth() {
-  localStorage.removeItem('user_id');
-  localStorage.removeItem('user_label');
-}
-
-function logout() {
-  clearAuth();
-  window.location.href = 'logIn.html';
-}
-
-function withUserId(body) {
-  const payload = body && typeof body === 'object' ? Object.assign({}, body) : {};
-  payload.user_id = getUserId();
-  return payload;
 }
 
 function initials(firstName, lastName) {
@@ -85,7 +93,7 @@ function requireLoginRedirect() {
 }
 
 function requireAuth() {
-  if (!getUserId()) {
+  if (!getToken()) {
     requireLoginRedirect();
     return false;
   }
@@ -94,7 +102,13 @@ function requireAuth() {
 
 function isAuthError(data) {
   const message = (data && data.message ? data.message : '').toLowerCase();
-  return message.includes('missing user_id') || message.includes('not logged in') || message.includes('unauth');
+  return (
+    message.includes('missing api token') ||
+    message.includes('invalid api token') ||
+    message.includes('missing user_id') ||
+    message.includes('not logged in') ||
+    message.includes('unauth')
+  );
 }
 
 function showMessage(el, message, isError) {

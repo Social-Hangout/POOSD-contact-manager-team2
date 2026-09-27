@@ -92,7 +92,7 @@
       }
 
       try {
-        const data = await apiPost('/list.php', withUserId({}));
+        const data = await apiPost('/list.php', {});
         if (data.status !== 'success') {
           if (isAuthError(data)) {
             requireLoginRedirect();
@@ -126,13 +126,13 @@
         return;
       }
 
-      const body = withUserId({
+      const body = {
         id: Number(idEl.value),
         first_name: firstNameEl.value.trim(),
         last_name: lastNameEl.value.trim(),
         phone: phoneEl.value.trim(),
         email: emailEl.value.trim()
-      });
+      };
 
       showMessage(messageEl, 'Saving…', false);
 
@@ -168,7 +168,7 @@
       showMessage(messageEl, 'Deleting…', false);
 
       try {
-        const data = await apiPost('/delete.php', withUserId({ id: Number(idEl.value) }));
+        const data = await apiPost('/delete.php', { id: Number(idEl.value) });
         if (data.status !== 'success') {
           if (isAuthError(data)) {
             requireLoginRedirect();
@@ -184,7 +184,7 @@
       }
     });
 
-    if (getUserId()) {
+    if (getToken()) {
       loadContact();
     }
   </script>

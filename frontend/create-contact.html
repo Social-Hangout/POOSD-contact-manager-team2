@@ -76,12 +76,12 @@
 
       const messageEl = document.getElementById('form-message');
 
-      const body = withUserId({
+      const body = {
         first_name: firstNameEl.value.trim(),
         last_name: lastNameEl.value.trim(),
         phone: document.getElementById('phone').value.trim(),
         email: document.getElementById('email').value.trim()
-      });
+      };
 
       showMessage(messageEl, 'Saving…', false);
 

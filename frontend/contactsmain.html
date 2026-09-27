@@ -90,7 +90,7 @@
     async function loadAllContacts() {
       messageEl.style.display = 'none';
       try {
-        const data = await apiPost('/list.php', withUserId({}));
+        const data = await apiPost('/list.php', {});
         if (data.status !== 'success') {
           if (isAuthError(data)) {
             requireLoginRedirect();
@@ -110,9 +110,7 @@
     async function searchContacts(term) {
       messageEl.style.display = 'none';
       try {
-        const data = await apiGet(
-          '/search.php?q=' + encodeURIComponent(term) + '&user_id=' + encodeURIComponent(getUserId())
-        );
+        const data = await apiGet('/search.php?q=' + encodeURIComponent(term));
         if (data.status !== 'success') {
           if (isAuthError(data)) {
             requireLoginRedirect();
