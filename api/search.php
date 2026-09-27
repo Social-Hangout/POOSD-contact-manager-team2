@@ -1,10 +1,11 @@
 <?php
+header('Content-Type: application/json');
 
-session_start();
+require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/auth.php';
 
-
-function respond($status,$data,$message){
-  
+function respond($status, $data, $message)
+{
 	$payload = array('status' => $status);
 
 	if ($data !== null)
@@ -21,51 +22,43 @@ function respond($status,$data,$message){
 	exit;
 }
 
-$search_name=isset($_GET['q']) ? trim($_GET['q']): '';
-if ($search_name===''){ respond('error',null,'Enter a name to search');}
+$search_name = isset($_GET['q']) ? trim($_GET['q']) : '';
+if ($search_name === '')
+{
+	respond('error', null, 'Enter a name to search');
+}
 
-$user_id=isset($_SESSION['user_id']) ? trim($_SESSION['user_id']): '';
-if ($user_id===''){ respond('unathorized',null,'unauthenticated user');}
-
-$pattern='%' . $search_name . '%';
-
-
-
-require_once __DIR__ . '/../../config.php';
+$pattern = '%' . $search_name . '%';
 
 $conn = new mysqli($db_host, $db_user, $db_pass, $db_name, $db_port);
 
-if($conn->connect_error){
-    respond('error',null,'Database connection failed');
+if ($conn->connect_error)
+{
+	respond('error', null, 'Database connection failed');
 }
 
-$stmt=$conn->prepare("SELECT id, first_name, last_name, email, phone FROM contacts WHERE user_id=? AND is_deleted = 0 AND (first_name LIKE ? OR last_name LIKE ? OR CONCAT(first_name,' ',last_name) LIKE ?)");
-$stmt->bind_param('isss', $user_id, $pattern ,$pattern,$pattern);
+$user_id = requireUserIdFromToken($conn, function ($message) {
+	respond('error', null, $message);
+});
+
+$stmt = $conn->prepare(
+	"SELECT id, first_name, last_name, email, phone FROM contacts WHERE user_id=? AND is_deleted = 0 AND (first_name LIKE ? OR last_name LIKE ? OR CONCAT(first_name,' ',last_name) LIKE ?)"
+);
+$stmt->bind_param('isss', $user_id, $pattern, $pattern, $pattern);
 $stmt->execute();
-$result=$stmt->get_result();
+$result = $stmt->get_result();
 
-
-
-
-
-$contacts= array();
-while($row=$result->fetch_assoc()){
-    $contacts[]=$row;
-    
-
-
+$contacts = array();
+while ($row = $result->fetch_assoc())
+{
+	$contacts[] = $row;
 }
 
+echo json_encode(array(
+	'status' => 'success',
+	'contacts' => $contacts
+));
 
-
-
-
-$payload = [
-    "status" => "success",
-    "contacts"=>$contacts,
-    
-    ];
-
-
-
-echo json_encode($payload);
+$stmt->close();
+$conn->close();
+?>

@@ -1,8 +1,8 @@
 <?php
 header('Content-Type: application/json');
-session_start();
 
 require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/auth.php';
 
 function respond($status, $contactId = null, $message = '')
 {
@@ -22,11 +22,6 @@ function respond($status, $contactId = null, $message = '')
 	exit;
 }
 
-if (!isset($_SESSION['user_id']))
-{
-	respond('error', null, 'Not logged in');
-}
-
 $inData = json_decode(file_get_contents('php://input'), true);
 
 if (!is_array($inData))
@@ -44,13 +39,15 @@ if ($firstName === '' || $lastName === '')
 	respond('error', null, 'First name and last name are required');
 }
 
-$userId = (int)$_SESSION['user_id'];
-
 $conn = new mysqli($db_host, $db_user, $db_pass, $db_name, $db_port);
 if ($conn->connect_error)
 {
 	respond('error', null, 'Database connection failed');
 }
+
+$userId = requireUserIdFromToken($conn, function ($message) {
+	respond('error', null, $message);
+});
 
 $stmt = $conn->prepare(
 	'INSERT INTO contacts (user_id, first_name, last_name, email, phone) VALUES (?, ?, ?, ?, ?)'

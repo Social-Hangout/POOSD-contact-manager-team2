@@ -15,7 +15,8 @@
       <a href="privacy.html">Privacy</a>
       <a href="about.html">About</a>
     </nav>
-    <a class="user-badge" id="user-name" href="userprofile.html">Account</a>
+    <a class="user-badge" id="user-name" href="#">Account</a>
+    <a class="login-btn" href="#" onclick="logout(); return false;">Log out</a>
   </header>
 
   <div class="page-body">
@@ -55,8 +56,6 @@
     const messageEl = document.getElementById('list-message');
     let searchTimer = null;
 
-    setUserBadge();
-
     function renderContacts(contacts) {
       listEl.querySelectorAll('.contact-row').forEach(function (row) {
         row.remove();
@@ -93,7 +92,7 @@
       try {
         const data = await apiPost('/list.php', {});
         if (data.status !== 'success') {
-          if ((data.message || '').toLowerCase().includes('not logged in')) {
+          if (isAuthError(data)) {
             requireLoginRedirect();
             return;
           }
@@ -113,7 +112,7 @@
       try {
         const data = await apiGet('/search.php?q=' + encodeURIComponent(term));
         if (data.status !== 'success') {
-          if ((data.status || '').includes('unauth') || (data.message || '').toLowerCase().includes('unauth')) {
+          if (isAuthError(data)) {
             requireLoginRedirect();
             return;
           }
@@ -142,7 +141,10 @@
       }, 250);
     });
 
-    loadAllContacts();
+    if (requireAuth()) {
+      setUserBadge();
+      loadAllContacts();
+    }
   </script>
 </body>
 </html>

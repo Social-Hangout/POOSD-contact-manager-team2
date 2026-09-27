@@ -1,8 +1,8 @@
 <?php
 header('Content-Type: application/json');
-session_start();
 
 require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/auth.php';
 
 function respond($status, $message = '')
 {
@@ -17,11 +17,6 @@ function respond($status, $message = '')
 	exit;
 }
 
-if (!isset($_SESSION['user_id']))
-{
-	respond('error', 'Not logged in');
-}
-
 $inData = json_decode(file_get_contents('php://input'), true);
 
 if (!is_array($inData))
@@ -29,7 +24,6 @@ if (!is_array($inData))
 	respond('error', 'Invalid JSON');
 }
 
-// Accept either "id" (schema) or "contact_id" (older docs)
 $rawId = null;
 if (isset($inData['id']) && is_numeric($inData['id']))
 {
@@ -56,13 +50,16 @@ if ($firstName === '' || $lastName === '')
 }
 
 $contactId = (int)$rawId;
-$userId = (int)$_SESSION['user_id'];
 
 $conn = new mysqli($db_host, $db_user, $db_pass, $db_name, $db_port);
 if ($conn->connect_error)
 {
 	respond('error', 'Database connection failed');
 }
+
+$userId = requireUserIdFromToken($conn, function ($message) {
+	respond('error', $message);
+});
 
 $stmt = $conn->prepare(
 	'UPDATE contacts SET first_name = ?, last_name = ?, email = ?, phone = ? WHERE id = ? AND user_id = ?'
@@ -83,7 +80,6 @@ if (!$stmt->execute())
 	respond('error', 'Failed to edit contact');
 }
 
-// affected_rows can be 0 when values are unchanged — still success if the row exists
 if ($stmt->affected_rows === 0)
 {
 	$stmt->close();

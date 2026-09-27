@@ -1,7 +1,8 @@
 <?php
 header('Content-Type: application/json');
-session_start();
+
 require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/auth.php';
 
 function respond($status, $message = '')
 {
@@ -16,18 +17,15 @@ function respond($status, $message = '')
 	exit;
 }
 
-if (!isset($_SESSION['user_id']))
-{
-	respond('error', 'Not logged in');
-}
-
-$userId = (int)$_SESSION['user_id'];
-
 $conn = new mysqli($db_host, $db_user, $db_pass, $db_name, $db_port);
 if ($conn->connect_error)
 {
 	respond('error', 'Database connection failed');
 }
+
+$userId = requireUserIdFromToken($conn, function ($message) {
+	respond('error', $message);
+});
 
 $stmt = $conn->prepare(
 	'DELETE FROM contacts WHERE user_id = ? AND is_deleted = 1'

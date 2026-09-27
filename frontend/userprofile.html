@@ -15,7 +15,7 @@
       <a href="privacy.html">Privacy</a>
       <a href="about.html">About</a>
     </nav>
-    <div class="user-badge" id="user-name">Account</div>
+    <div class="user-badge" id="user-name" onclick="logout()" style="cursor:pointer;">Log out</div>
   </header>
 
   <div class="page-body">
@@ -53,7 +53,11 @@
 
   <script src="api.js"></script>
   <script>
-    setUserBadge();
+    if (!requireAuth()) {
+      // Redirecting to login
+    } else {
+      setUserBadge();
+    }
 
     const params = new URLSearchParams(window.location.search);
     const contactId = params.get('id');
@@ -90,7 +94,7 @@
       try {
         const data = await apiPost('/list.php', {});
         if (data.status !== 'success') {
-          if ((data.message || '').toLowerCase().includes('not logged in')) {
+          if (isAuthError(data)) {
             requireLoginRedirect();
             return;
           }
@@ -115,6 +119,7 @@
 
     document.getElementById('edit-form').addEventListener('submit', async function (e) {
       e.preventDefault();
+      if (!requireAuth()) return;
 
       if (!idEl.value) {
         showMessage(messageEl, 'No contact loaded', true);
@@ -134,7 +139,7 @@
       try {
         const data = await apiPost('/edit.php', body);
         if (data.status !== 'success') {
-          if ((data.message || '').toLowerCase().includes('not logged in')) {
+          if (isAuthError(data)) {
             requireLoginRedirect();
             return;
           }
@@ -149,6 +154,8 @@
     });
 
     document.getElementById('delete-btn').addEventListener('click', async function () {
+      if (!requireAuth()) return;
+
       if (!idEl.value) {
         showMessage(messageEl, 'No contact loaded', true);
         return;
@@ -163,7 +170,7 @@
       try {
         const data = await apiPost('/delete.php', { id: Number(idEl.value) });
         if (data.status !== 'success') {
-          if ((data.message || '').toLowerCase().includes('not logged in')) {
+          if (isAuthError(data)) {
             requireLoginRedirect();
             return;
           }
@@ -177,7 +184,9 @@
       }
     });
 
-    loadContact();
+    if (getToken()) {
+      loadContact();
+    }
   </script>
 </body>
 </html>

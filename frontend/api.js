@@ -1,18 +1,51 @@
 /* Shared API helpers for the Contact Manager frontend.
-   Uses session cookies (credentials: 'include') so login persists across pages.
-   API_BASE is absolute so it works both locally (php -S from repo root)
-   and on the deployed server (frontend at /var/www/html, api at /api). */
+   Auth uses a token from login (X-API-Key). The server derives user_id
+   from the token — the client never sends user_id for contact ops. */
 
 const API_BASE = '/api';
 
+function getToken() {
+  return localStorage.getItem('api_token') || '';
+}
+
+function setAuth(userId, token, label) {
+  if (userId != null) {
+    localStorage.setItem('user_id', String(userId));
+  }
+  if (token) {
+    localStorage.setItem('api_token', token);
+  }
+  if (label) {
+    localStorage.setItem('user_label', label);
+  }
+}
+
+function clearAuth() {
+  localStorage.removeItem('user_id');
+  localStorage.removeItem('api_token');
+  localStorage.removeItem('user_label');
+}
+
+function logout() {
+  clearAuth();
+  window.location.href = 'logIn.html';
+}
+
 async function apiRequest(path, options = {}) {
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(options.headers || {})
+  };
+
+  const token = getToken();
+  if (token) {
+    headers['X-API-Key'] = token;
+  }
+
   const config = {
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers || {})
-    },
-    ...options
+    ...options,
+    headers
   };
 
   const response = await fetch(`${API_BASE}${path}`, config);
@@ -31,7 +64,7 @@ async function apiRequest(path, options = {}) {
 function apiPost(path, body) {
   return apiRequest(path, {
     method: 'POST',
-    body: JSON.stringify(body)
+    body: JSON.stringify(body == null ? {} : body)
   });
 }
 
@@ -49,16 +82,33 @@ function setUserBadge() {
   const el = document.getElementById('user-name');
   if (!el) return;
 
-  const label = sessionStorage.getItem('user_label');
+  const label = localStorage.getItem('user_label');
   if (label) {
     el.textContent = label;
   }
 }
 
 function requireLoginRedirect() {
-  // Soft check: if list fails with not logged in, send to login.
-  // Pages call this after a failed auth response.
   window.location.href = 'logIn.html';
+}
+
+function requireAuth() {
+  if (!getToken()) {
+    requireLoginRedirect();
+    return false;
+  }
+  return true;
+}
+
+function isAuthError(data) {
+  const message = (data && data.message ? data.message : '').toLowerCase();
+  return (
+    message.includes('missing api token') ||
+    message.includes('invalid api token') ||
+    message.includes('missing user_id') ||
+    message.includes('not logged in') ||
+    message.includes('unauth')
+  );
 }
 
 function showMessage(el, message, isError) {

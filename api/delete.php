@@ -1,8 +1,8 @@
 <?php
 header('Content-Type: application/json');
-session_start();
 
 require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/auth.php';
 
 function respond($status, $message = '')
 {
@@ -15,11 +15,6 @@ function respond($status, $message = '')
 
 	echo json_encode($payload);
 	exit;
-}
-
-if (!isset($_SESSION['user_id']))
-{
-	respond('error', 'Not logged in');
 }
 
 $inData = json_decode(file_get_contents('php://input'), true);
@@ -45,13 +40,17 @@ if ($rawId === null)
 }
 
 $contactId = (int)$rawId;
-$userId = (int)$_SESSION['user_id'];
 
 $conn = new mysqli($db_host, $db_user, $db_pass, $db_name, $db_port);
 if ($conn->connect_error)
 {
 	respond('error', 'Database connection failed');
 }
+
+$userId = requireUserIdFromToken($conn, function ($message) {
+	respond('error', $message);
+});
+
 $stmt = $conn->prepare(
 	'UPDATE contacts SET is_deleted = 1, deleted_at = NOW() WHERE id = ? AND user_id = ? AND is_deleted = 0'
 );

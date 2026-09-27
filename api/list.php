@@ -1,8 +1,8 @@
 <?php
 header('Content-Type: application/json');
-session_start();
 
 require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/auth.php';
 
 function respond($status, $contacts = null, $message = '')
 {
@@ -22,18 +22,26 @@ function respond($status, $contacts = null, $message = '')
 	exit;
 }
 
-if (!isset($_SESSION['user_id']))
+// Body is optional for list; allow empty POST
+$raw = file_get_contents('php://input');
+if ($raw !== '' && $raw !== false)
 {
-	respond('error', null, 'Not logged in');
+	$inData = json_decode($raw, true);
+	if ($inData !== null && !is_array($inData))
+	{
+		respond('error', null, 'Invalid JSON');
+	}
 }
-
-$userId = (int)$_SESSION['user_id'];
 
 $conn = new mysqli($db_host, $db_user, $db_pass, $db_name, $db_port);
 if ($conn->connect_error)
 {
 	respond('error', null, 'Database connection failed');
 }
+
+$userId = requireUserIdFromToken($conn, function ($message) {
+	respond('error', null, $message);
+});
 
 $stmt = $conn->prepare(
 	'SELECT id, first_name, last_name, email, phone FROM contacts WHERE user_id = ? AND is_deleted = 0 ORDER BY first_name ASC, last_name ASC');
