@@ -15,7 +15,7 @@
       <a href="privacy.html">Privacy</a>
       <a href="about.html">About</a>
     </nav>
-    <div class="user-badge" id="user-name">Account</div>
+    <div class="user-badge" id="user-name" onclick="logout()" style="cursor:pointer;">Log out</div>
   </header>
 
   <div class="page-body">
@@ -53,7 +53,11 @@
 
   <script src="api.js"></script>
   <script>
-    setUserBadge();
+    if (!requireAuth()) {
+      // Redirecting to login
+    } else {
+      setUserBadge();
+    }
 
     const firstNameEl = document.getElementById('first-name');
     const lastNameEl = document.getElementById('last-name');
@@ -68,21 +72,23 @@
 
     document.getElementById('create-form').addEventListener('submit', async function (e) {
       e.preventDefault();
+      if (!requireAuth()) return;
+
       const messageEl = document.getElementById('form-message');
 
-      const body = {
+      const body = withUserId({
         first_name: firstNameEl.value.trim(),
         last_name: lastNameEl.value.trim(),
         phone: document.getElementById('phone').value.trim(),
         email: document.getElementById('email').value.trim()
-      };
+      });
 
       showMessage(messageEl, 'Saving…', false);
 
       try {
         const data = await apiPost('/add.php', body);
         if (data.status !== 'success') {
-          if ((data.message || '').toLowerCase().includes('not logged in')) {
+          if (isAuthError(data)) {
             requireLoginRedirect();
             return;
           }

@@ -61,8 +61,8 @@
           return;
         }
 
-        sessionStorage.setItem('user_id', String(data.user_id || ''));
-        sessionStorage.setItem('user_label', email);
+        setUserId(data.user_id);
+        localStorage.setItem('user_label', email);
         window.location.href = 'contactsmain.html';
       } catch (err) {
         showMessage(messageEl, err.message || 'Network error', true);

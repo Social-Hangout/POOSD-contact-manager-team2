@@ -1,7 +1,6 @@
 /* Shared API helpers for the Contact Manager frontend.
-   Uses session cookies (credentials: 'include') so login persists across pages.
-   API_BASE is absolute so it works both locally (php -S from repo root)
-   and on the deployed server (frontend at /var/www/html, api at /api). */
+   Auth is stateless: store user_id in localStorage after login and
+   send it on every contact API request (SwaggerHub-friendly). */
 
 const API_BASE = '/api';
 
@@ -39,6 +38,32 @@ function apiGet(path) {
   return apiRequest(path, { method: 'GET' });
 }
 
+function getUserId() {
+  const raw = localStorage.getItem('user_id');
+  const id = Number(raw);
+  return Number.isInteger(id) && id > 0 ? id : null;
+}
+
+function setUserId(userId) {
+  localStorage.setItem('user_id', String(userId));
+}
+
+function clearAuth() {
+  localStorage.removeItem('user_id');
+  localStorage.removeItem('user_label');
+}
+
+function logout() {
+  clearAuth();
+  window.location.href = 'logIn.html';
+}
+
+function withUserId(body) {
+  const payload = body && typeof body === 'object' ? Object.assign({}, body) : {};
+  payload.user_id = getUserId();
+  return payload;
+}
+
 function initials(firstName, lastName) {
   const a = (firstName || '').trim().charAt(0);
   const b = (lastName || '').trim().charAt(0);
@@ -49,16 +74,27 @@ function setUserBadge() {
   const el = document.getElementById('user-name');
   if (!el) return;
 
-  const label = sessionStorage.getItem('user_label');
+  const label = localStorage.getItem('user_label');
   if (label) {
     el.textContent = label;
   }
 }
 
 function requireLoginRedirect() {
-  // Soft check: if list fails with not logged in, send to login.
-  // Pages call this after a failed auth response.
   window.location.href = 'logIn.html';
+}
+
+function requireAuth() {
+  if (!getUserId()) {
+    requireLoginRedirect();
+    return false;
+  }
+  return true;
+}
+
+function isAuthError(data) {
+  const message = (data && data.message ? data.message : '').toLowerCase();
+  return message.includes('missing user_id') || message.includes('not logged in') || message.includes('unauth');
 }
 
 function showMessage(el, message, isError) {
