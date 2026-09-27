@@ -54,6 +54,29 @@
 
 <script src="api.js"></script>
 <script>
+document.getElementById('empty-trash-btn').addEventListener('click', async function () {
+  const confirmed = confirm('Permanently delete all trashed contacts? This cannot be undone.');
+  if (!confirmed) return;
+
+  try {
+    const data = await apiRequest('/empty-trash.php', { method: 'POST' });
+
+    if (data.status === 'success') {
+      const listEl = document.getElementById('trash-list');
+      listEl.innerHTML = '';
+      const emptyState = document.createElement('p');
+      emptyState.className = 'empty-state';
+      emptyState.id = 'trash-empty-state';
+      emptyState.textContent = 'No deleted contacts.';
+      listEl.appendChild(emptyState);
+      document.getElementById('trash-count').textContent = '0';
+    } else {
+      alert(data.message || 'Failed to empty trash.');
+    }
+  } catch (err) {
+    alert('Something went wrong connecting to the server.');
+  }
+});
 async function loadTrash() {
   const listEl = document.getElementById('trash-list');
   const emptyState = document.getElementById('trash-empty-state');
